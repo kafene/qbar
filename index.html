@@ -18,9 +18,24 @@
 :focus {outline:none}
 ::-moz-focus-inner {border:0}
 body{
-  margin: 10em auto;
+  margin: 0 auto;
+  margin-top: 10em;
   width: 30em;
   font-size: 20px;
+}
+a {
+  color: #ae4141;
+  text-decoration: none;
+}
+a:hover {
+  color: #c24545;
+  text-decoration: underline;
+}
+a:active, a:visited {
+  color: #993333;
+}
+h3{
+  margin: .7em 0 .2em;
 }
 form{
   font-family: "Droid Sans", "Tahoma", sans;
@@ -53,63 +68,86 @@ input{
 <script type="text/javascript">
 
 // CONFIG
-default_engine = "g";
-engines= {
-  g: {s: 'https://google.com/search?q=%s', n: 'Google'},
-  y: {s: 'https://www.youtube.com/results?search_query=%s', n: 'YouTube'},
-  m: {s: 'https://maps.google.com/maps?q=%s', n: 'Google Maps'},
-  d: {s: 'https://duckduckgo.com/?k1=-1&kp=-1&q=%s', n: 'DuckDuckGo'},
-  x: {s: 'https://xkcd.com/', n: 'xkcd'},
-};
+engines = [
+  {k:'g', n: 'Google',      u: 'https://google.com', s: 'https://google.com/search?q=%s'},
+  {k:'y', n: 'YouTube',     u: 'https://www.youtube.com', s: 'https://www.youtube.com/results?search_query=%s'},
+  {k:'m', n: 'Google Maps', s: 'https://maps.google.com/maps?q=%s'},
+  {k:'d', n: 'DuckDuckGo',  s: 'https://duckduckgo.com/?k1=-1&kp=-1&q=%s'},
+  {k:'x', n: 'xkcd',        u: 'https://xkcd.com/'},
+];
 debug = false;
 
 // FUNCTIONS
 function get_param() {
-  v = {};
+  a = {};
   window.location.href.replace(/[?&]+([^=&]+)=?([^&]*)/gi, 
-    function(m,a,b){ v[a] = decodeURIComponent(b); });
-  return v;
+    function(m,k,v){ a[k] = decodeURIComponent(v); });
+  return a;
 }
-function info(s){
-  document.getElementById('info').innerHTML = s;
+function info(s, a){
+  box = document.getElementById('info');
+  if (a) box.innerHTML += s;
+  else   box.innerHTML  = s;
 }
 function trim(s){
   return s.replace(/^ */, '').replace(/ *$/, '');
 }
 function list(){
-  var list = '';
-  for (e in engines)
-    list = list + '<b>' + e + ':</b> ' + engines[e]['n'] + '<br>';
-  info(list);
+  m = '';
+  e = '';
+  for (i in engines){
+    s = '<b>' + engines[i].k + ':</b> ' + engines[i].n + '<br>';
+    if (engines[i].s) e += s;
+    else m += s;
+  }
+  info('<h3>Engines</h3>' + e + '<h3>Bookmarks</h3>' + m);
 }
-function search(q){
+function get_engine(k, s){
+  for (i in engines){
+    if (engines[i].k == k){
+      if (!(!engines[i].s && s))  return engines[i];
+    }
+  }
+}
+function search(q, go){
   q = q.trim();
   a = q.split(' ')[0];
-  if (a == "ls") list();
-  else if (q){
-    if (engines[a])
-      q = q.substr(a.length).trim();
-    else
-      a = default_engine;
-    name = engines[a]['n'];
-    url = engines[a]['s'];
-    url = url.replace(/%s/gi, encodeURIComponent(q));
-    dtext = debug ? '<a href="' + url + '">' + url + '</a>' : '';
-    info('<b>' + name + '</b> ' + q + '<br>' + dtext);
-    if (!debug) window.location.assign(url);
+  s = q.substr(a.length).trim();
+  if (a == "ls" || !q) list();
+  else {
+    e = get_engine(a, s);
+    if (!e){
+      e = engines[0];
+      s = q;
+    }
+    if (e.s && s) url = e.s.replace(/%s/gi, encodeURIComponent(s));
+    else if (!e.u && !s) url = e.s.replace(/%s/gi, '');
+    else url = e.u;
+    name = e.n;
+    info('<b>' + name + '</b> ' + s + '<br>');
+    if (debug) info('<a href="' + url + '">' + url + '</a>', true);
+    else if (go) window.location.assign(url);
   }
 }
 
 // ONLOAD
 window.onload = function(){
-  list();
-  param = get_param()['q'];
-  if (param) search(decodeURIComponent(param));
-  if (get_param()['d'] != undefined) debug = true;
-  document.getElementById('form').onsubmit = function(){
-    search(document.getElementById('q').value);
+  q = document.getElementById('q');
+  form = document.getElementById('form');
+  q.value = '';
+  if (get_param().d != undefined) debug = true;
+  form.onsubmit = function(){
+    search(q.value, true);
     return false;
   };
+  q.onkeyup = function(){
+    search(q.value);
+  };
+  if (get_param().q){
+    q.value = get_param().q;
+    search(q.value, true);
+  }
+  else search(q.value);
 };
 
 </script>
