@@ -89,8 +89,8 @@ function info(s, a){
   if (a) box.innerHTML += s;
   else   box.innerHTML  = s;
 }
-function trim(s){
-  return s.replace(/^ */, '').replace(/ *$/, '');
+function shrink(s){
+  return s.trim().replace(/ +/g, ' ');
 }
 function list(){
   m = '';
@@ -110,7 +110,7 @@ function get_engine(k, s){
   }
 }
 function search(q, go){
-  q = q.trim();
+  q = shrink(q);
   a = q.split(' ')[0];
   s = q.substr(a.length).trim();
   if (a == "ls" || !q) list();
@@ -120,11 +120,14 @@ function search(q, go){
       e = engines[0];
       s = q;
     }
-    if (e.s && s) url = e.s.replace(/%s/gi, encodeURIComponent(s));
-    else if (!e.u && !s) url = e.s.replace(/%s/gi, '');
-    else url = e.u;
     name = e.n;
-    info('<b>' + name + '</b> ' + s + '<br>');
+    if ((e.s && s) || (!e.u && !s)){
+      url = e.s.replace(/%s/gi, encodeURIComponent(s));
+    }
+    else{
+      url = e.u;
+    }
+    info('<b>' + name + '</b> ' + ((!s && e.s)?'...':s) + '<br>');
     if (debug) info('<a href="' + url + '">' + url + '</a>', true);
     else if (go) window.location.assign(url);
   }
