@@ -1,0 +1,107 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Q search</title>
+</head>
+<body>
+  <form id="form" action="index.html" method="GET">
+    <input id="q" type="text" name="q" value="" autofocus />
+    <input type="submit" value="Q" />
+  </form>
+  <div id="info"></div>
+</body>
+
+
+<!-- STYLE -->
+<style>
+:focus {outline:none;}
+::-moz-focus-inner {border:0;}
+body{
+  margin: 10em auto;
+  width: 30em;
+  font-size: 20px;
+}
+form{
+  font-family: "Droid Sans", "Tahoma", sans;
+}
+input{
+  padding: .5em;
+  border: 1px solid #aaa;
+  background-color: #fafafa;
+  font-size: 20px;
+  width: 3em;
+  margin-bottom: 1em;
+}
+#q{
+  width: 20em;
+}
+#info{
+  padding: .5em;
+}
+</style>
+
+
+<!-- SCRIPT -->
+<script type="text/javascript">
+
+// CONFIG
+default_engine = "g";
+engines= {
+  g: {s: 'https://google.com/search?q=%s', n: 'Google'},
+  y: {s: 'https://www.youtube.com/results?search_query=%s', n: 'YouTube'},
+  m: {s: 'https://maps.google.com/maps?q=%s', n: 'Google Maps'},
+  x: {s: 'https://xkcd.com/', n: 'xkcd'},
+};
+
+// FUNCTIONS
+function get_param() {
+  v = {};
+  window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, 
+    function(m,a,b){ v[a] = decodeURIComponent(b); });
+  return v;
+}
+function info(s){
+  document.getElementById('info').innerHTML = s;
+}
+function trim(s){
+  s = s.replace(/^ */, '');
+  s = s.replace(/ *$/, '');
+}
+function list(){
+  var list = '';
+  for (e in engines)
+    list = list + '<b>' + e + ':</b> ' + engines[e]['n'] + '<br>';
+  info(list);
+}
+function search(q){
+  a = q.split(' ')[0];
+  if (a == "ls"){
+   return;
+  }
+  if (engines[a]){
+    url = engines[a]['s'];
+    q = q.substr(a.length);
+    name = engines[a]['n'];
+  } else {
+    url = engines[default_engine]['s'];
+    name = engines[default_engine]['n'];
+  }
+  url = url.replace(/%s/gi, encodeURIComponent(q.trim()));
+  info('<b>' + name + '</b> ' + q + '<br>' + url);
+  //window.location.href = url;
+}
+
+// ONLOAD
+window.onload = function(){
+  list();
+  param = get_param()['q'];
+  if (param) search(decodeURIComponent(param));
+  document.getElementById('form').onsubmit = function(){
+    search(document.getElementById('q').value);
+    return false;
+  };
+};
+
+</script>
+</html>
