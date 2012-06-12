@@ -1,22 +1,22 @@
 <!DOCTYPE HTML>
 <html lang="en">
 <head>
-	<meta charset="UTF-8">
-	<title>Q search</title>
+  <meta charset="UTF-8">
+  <title>Q bar</title>
 </head>
 <body>
   <form id="form" action="index.html" method="GET">
-    <input id="q" type="text" name="q" value="" autofocus />
-    <input type="submit" value="Q" />
+    <input class="query" id="q" type="text" name="q" value="" autofocus />
+    <input class="button" type="submit" value="Q" />
   </form>
-  <div id="info"></div>
+  <div class="info" id="info"></div>
 </body>
 
 
 <!-- STYLE -->
 <style>
-:focus {outline:none;}
-::-moz-focus-inner {border:0;}
+:focus {outline:none}
+::-moz-focus-inner {border:0}
 body{
   margin: 10em auto;
   width: 30em;
@@ -28,15 +28,22 @@ form{
 input{
   padding: .5em;
   border: 1px solid #aaa;
-  background-color: #fafafa;
+  background-color: #f8f8f8;
   font-size: 20px;
   width: 3em;
   margin-bottom: 1em;
+  border-radius: 3px;
 }
-#q{
+.button:hover{
+  background-color: #fff;
+}
+.button:active{
+  background-color: #eee;
+}
+.query{
   width: 20em;
 }
-#info{
+.info{
   padding: .5em;
 }
 </style>
@@ -51,8 +58,10 @@ engines= {
   g: {s: 'https://google.com/search?q=%s', n: 'Google'},
   y: {s: 'https://www.youtube.com/results?search_query=%s', n: 'YouTube'},
   m: {s: 'https://maps.google.com/maps?q=%s', n: 'Google Maps'},
+  d: {s: 'https://duckduckgo.com/?k1=-1&kp=-1&q=%s', n: 'DuckDuckGo'},
   x: {s: 'https://xkcd.com/', n: 'xkcd'},
 };
+debug = false;
 
 // FUNCTIONS
 function get_param() {
@@ -65,8 +74,7 @@ function info(s){
   document.getElementById('info').innerHTML = s;
 }
 function trim(s){
-  s = s.replace(/^ */, '');
-  s = s.replace(/ *$/, '');
+  return s.replace(/^ */, '').replace(/ *$/, '');
 }
 function list(){
   var list = '';
@@ -75,22 +83,21 @@ function list(){
   info(list);
 }
 function search(q){
+  q = q.trim();
   a = q.split(' ')[0];
-  if (a == "ls"){
-   return;
-  }
-  if (engines[a]){
-    url = engines[a]['s'];
-    q = q.substr(a.length);
+  if (a == "ls") list();
+  else if (q){
+    if (engines[a])
+      q = q.substr(a.length).trim();
+    else
+      a = default_engine;
     name = engines[a]['n'];
-  } else {
-    url = engines[default_engine]['s'];
-    name = engines[default_engine]['n'];
+    url = engines[a]['s'];
+    url = url.replace(/%s/gi, encodeURIComponent(q));
+    dtext = debug ? '<a href="' + url + '">' + url + '</a>' : '';
+    info('<b>' + name + '</b> ' + q + '<br>' + dtext);
+    if (!debug) window.location.assign(url);
   }
-  url = url.replace(/%s/gi, encodeURIComponent(q.trim()));
-  info('<b>' + name + '</b> ' + q + '<br>' + url);
-  if (get_param()['d'] == undefined)
-    window.location.href = url;
 }
 
 // ONLOAD
@@ -98,6 +105,7 @@ window.onload = function(){
   list();
   param = get_param()['q'];
   if (param) search(decodeURIComponent(param));
+  if (get_param()['d'] != undefined) debug = true;
   document.getElementById('form').onsubmit = function(){
     search(document.getElementById('q').value);
     return false;
