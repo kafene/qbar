@@ -10,7 +10,7 @@ It process `?q=` parameter, so it can be set as your default search engine.
 
 It is only one html page with javascript, so it is pretty portable.
 
-## What is working
+## What works
 
 - listing of engines
 - query processing

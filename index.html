@@ -57,7 +57,7 @@ engines= {
 // FUNCTIONS
 function get_param() {
   v = {};
-  window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, 
+  window.location.href.replace(/[?&]+([^=&]+)=?([^&]*)/gi, 
     function(m,a,b){ v[a] = decodeURIComponent(b); });
   return v;
 }
@@ -89,7 +89,8 @@ function search(q){
   }
   url = url.replace(/%s/gi, encodeURIComponent(q.trim()));
   info('<b>' + name + '</b> ' + q + '<br>' + url);
-  //window.location.href = url;
+  if (get_param()['d'] == undefined)
+    window.location.href = url;
 }
 
 // ONLOAD
