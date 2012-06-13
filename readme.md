@@ -18,6 +18,7 @@ It is only one html page with javascript, so it is pretty portable.
 
 ## Todo
 
+- load url
 - interface to edit engines and bookmarks
 - saving edited config
 - maybe synchronization with firefox

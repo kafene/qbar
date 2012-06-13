@@ -138,6 +138,7 @@ window.onload = function(){
   q = document.getElementById('q');
   form = document.getElementById('form');
   q.value = '';
+  q.focus();
   if (get_param().d != undefined) debug = true;
   form.onsubmit = function(){
     search(q.value, true);
