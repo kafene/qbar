@@ -14,11 +14,11 @@ It is only one html page with javascript, so it is pretty portable.
 
 - listing of engines
 - query processing
+- queries starting with `http://` are redirected
 - engines can be edited in page source
 
 ## Todo
 
-- load url
 - interface to edit engines and bookmarks
 - saving edited config
 - maybe synchronization with firefox

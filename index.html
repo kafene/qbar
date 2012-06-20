@@ -23,16 +23,15 @@ body{
   width: 30em;
   font-size: 20px;
 }
-a {
-  color: #ae4141;
+a, a:visited{
+  color: #bbb;
   text-decoration: none;
 }
-a:hover {
-  color: #c24545;
-  text-decoration: underline;
+a:hover{
+  color: #888;
 }
-a:active, a:visited {
-  color: #993333;
+a:active{
+  color: #555;
 }
 h3{
   margin: .7em 0 .2em;
@@ -56,10 +55,14 @@ input{
   background-color: #eee;
 }
 .query{
-  width: 20em;
+  width: 25em;
 }
 .info{
   padding: .5em;
+}
+.info b{
+  min-width: 2em;
+  display: inline-block;
 }
 </style>
 
@@ -69,11 +72,63 @@ input{
 
 // CONFIG
 engines = [
-  {k:'g', n: 'Google',      u: 'https://google.com', s: 'https://google.com/search?q=%s'},
-  {k:'y', n: 'YouTube',     u: 'https://www.youtube.com', s: 'https://www.youtube.com/results?search_query=%s'},
-  {k:'m', n: 'Google Maps', s: 'https://maps.google.com/maps?q=%s'},
-  {k:'d', n: 'DuckDuckGo',  s: 'https://duckduckgo.com/?k1=-1&kp=-1&q=%s'},
-  {k:'x', n: 'xkcd',        u: 'https://xkcd.com/'},
+  {
+    k:'g', n:'google',
+    u:'https://google.com',
+    s:'https://google.com/search?q=%s',
+  }, {
+    k:'y', n:'youtube',
+    u:'https://www.youtube.com',
+    s:'https://www.youtube.com/results?search_query=%s',
+  }, {
+    k:'m', n:'google maps',
+    u:'https://maps.google.com',
+    s:'https://maps.google.com/maps?q=%s',
+  }, {
+    k:'i', n:'google images',
+    u:'https://images.google.com',
+    s:'https://images.google.com/search?tbm=isch&q=%s',
+  }, {
+    k:'d', n:'duck duck go',
+    s:'https://duckduckgo.com/?k1=-1&kp=-1&q=%s',
+  }, {
+    k:'gh', n:'github',
+    u:'https://github.com/unu',
+    s:'https://github.com/search?q=%s',
+  }, {
+    k:'a', n:'alternativeto',
+    u:'http://alternativeto.net',
+    s:'http://alternativeto.net/SearchResult.aspx?profile=all&search=%s',
+  }, {
+    k:'w', n:'wikipedie.cz',
+    u:'https://cs.wikipedia.org',
+    s:'https://secure.wikimedia.org/wikipedia/cs/wiki/%s',
+  }, {
+    k:'r', n:'rlslog',
+    u:'http://www.rlslog.net',
+    s:'http://www.rlslog.net/?s=%s',
+  }, {
+    k:'u', n:'ulož.to',
+    u:'http://www.uloz.to',
+    s:'http://www.uloz.to/hledej/?q=%s',
+  }, {
+    k:'c', n:'čsfd',
+    u:'http://www.csfd.cz',
+    s:'http://www.csfd.cz/hledat/?q=%s',
+  }, {
+    k:'t', n:'titulky',
+    u:'http://www.titulky.com',
+    s:'http://www.titulky.com/index.php?Fulltext=%s',
+  }, {
+    k:'rss', n:'google reader',
+    u:'https://reader.google.com',
+  }, {
+    k:'gb', n:'gimme bar',
+    u:'https://gimmebar.com',
+  }, {
+    k:'x', n:'xkcd',
+    u:'https://xkcd.com/',
+  },
 ];
 debug = false;
 
@@ -96,7 +151,7 @@ function list(){
   m = '';
   e = '';
   for (i in engines){
-    s = '<b>' + engines[i].k + ':</b> ' + engines[i].n + '<br>';
+    s = '<b>' + engines[i].k + '</b> ' + engines[i].n + '<br>';
     if (engines[i].s) e += s;
     else m += s;
   }
@@ -114,6 +169,10 @@ function search(q, go){
   a = q.split(' ')[0];
   s = q.substr(a.length).trim();
   if (a == "ls" || !q) list();
+  else if (q.match(/^https?:\/\/.*$/i)){
+    info('Go to: <a href="' + q + '">' + q + '</a>');
+    if (!debug && go) window.location.assign(q);
+  }
   else {
     e = get_engine(a, s);
     if (!e){
@@ -128,8 +187,8 @@ function search(q, go){
       url = e.u;
     }
     info('<b>' + name + '</b> ' + ((!s && e.s)?'...':s) + '<br>');
-    if (debug) info('<a href="' + url + '">' + url + '</a>', true);
-    else if (go) window.location.assign(url);
+    info('<a href="' + url + '">' + url + '</a>', true);
+    if (!debug && go) window.location.assign(url);
   }
 }
 
