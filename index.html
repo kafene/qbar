@@ -165,28 +165,33 @@ function get_engine(k, s){
   }
 }
 function search(q, go){
+  full = q;
   q = shrink(q);
   a = q.split(' ')[0];
   s = q.substr(a.length).trim();
-  if (a == "ls" || !q) list();
-  else if (q.match(/^https?:\/\/.*$/i)){
+  // list commands
+  if (q == "ls" || !q) list();
+  // load url
+  else if (q.match(/^https?:\/\/[^ ]+$/i) || full.match(/^[^ ]+\.[^ ]{2,}$/)){
+    if (!q.match(/^https?:\/\/[^ ]+$/i)) q = 'http://' + q;
     info('Go to: <a href="' + q + '">' + q + '</a>');
     if (!debug && go) window.location.assign(q);
   }
+  // search or bookmark
   else {
     e = get_engine(a, s);
+    // default engine
     if (!e){
       e = engines[0];
       s = q;
     }
-    name = e.n;
+    // search
     if ((e.s && s) || (!e.u && !s)){
       url = e.s.replace(/%s/gi, encodeURIComponent(s));
     }
-    else{
-      url = e.u;
-    }
-    info('<b>' + name + '</b> ' + ((!s && e.s)?'...':s) + '<br>');
+    // bookmark
+    else url = e.u;
+    info('<b>' + e.n + '</b> ' + ((!s && e.s)?'...':s) + '<br>');
     info('<a href="' + url + '">' + url + '</a>', true);
     if (!debug && go) window.location.assign(url);
   }
