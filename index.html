@@ -86,8 +86,8 @@ engines = [
     s:'https://maps.google.com/maps?q=%s',
   }, {
     k:'i', n:'google images',
-    u:'https://images.google.com',
-    s:'https://images.google.com/search?tbm=isch&q=%s',
+    u:'https://google.com',
+    s:'https://google.com/search?tbm=isch&q=%s',
   }, {
     k:'d', n:'duck duck go',
     s:'https://duckduckgo.com/?k1=-1&kp=-1&q=%s',
@@ -120,6 +120,14 @@ engines = [
     u:'http://www.titulky.com',
     s:'http://www.titulky.com/index.php?Fulltext=%s',
   }, {
+    k:'cs', n:'en > cs',
+    u:'http://translate.google.com',
+    s:'http://translate.google.com/#en|cs|%s',
+  }, {
+    k:'en', n:'cs > en',
+    u:'http://translate.google.com',
+    s:'http://translate.google.com/#cs|en|%s',
+  }, {
     k:'rss', n:'google reader',
     u:'https://reader.google.com',
   }, {
@@ -136,7 +144,10 @@ debug = false;
 function get_param() {
   a = {};
   window.location.href.replace(/[?&]+([^=&]+)=?([^&]*)/gi, 
-    function(m,k,v){ a[k] = decodeURIComponent(v); });
+    function(m,k,v){
+      try{ a[k] = decodeURIComponent(v); }
+      catch(err){ a[k] = ''; } // %s bug in firefox
+    });
   return a;
 }
 function info(s, a){
@@ -170,7 +181,7 @@ function search(q, go){
   a = q.split(' ')[0];
   s = q.substr(a.length).trim();
   // list commands
-  if (q == "ls" || !q) list();
+  if (q == "ls" || !q || q == '%s') list();
   // load url
   else if (q.match(/^https?:\/\/[^ ]+$/i) || full.match(/^[^ ]+\.[^ ]{2,}$/)){
     if (!q.match(/^https?:\/\/[^ ]+$/i)) q = 'http://' + q;
