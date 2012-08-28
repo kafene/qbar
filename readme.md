@@ -1,25 +1,11 @@
-# Q bar: portable omnibar
+# Q bar - portable omnibar
 
 **Q bar** brings many search engines to one page.
-You can type searched words or url address here.
-You can assign keyword to different search engines.
-For example, if want to find a video on YouTube, type:
 
-    y Homer's life in 2 minutes 
+- you can input searched words or full url address
+- you can assign keywords to different search engines, to find video on YouTube type:
 
-It process `?q=` parameter, so it can be set as your default search engine.
+        y homer's life in 2 minutes
 
-It is only one html page with javascript, so it is pretty portable.
-
-## What works
-
-- listing of engines
-- query processing
-- engines can be edited in page source
-- all urls are redirected
-
-## Todo
-
-- interface to edit engines and bookmarks
-- saving edited config
-- maybe synchronization with firefox
+- it process `?q=` parameter, so it can be set as default search engine
+- it is only one html file with javascript, so it is pretty portable
