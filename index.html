@@ -122,7 +122,8 @@ function list(){
     if (engines[i].s) e += s;
     else m += s;
   }
-  info('<h3>engines</h3>' + e + '<h3>bookmarks</h3>' + m);
+  info('<div class="engines"><h3>engines</h3>' + e + '</div>'
+     + '<div class="bookmarks"><h3>bookmarks</h3>' + m + '</div>');
 }
 function get_engine(k, s){
   for (i in engines){
@@ -215,7 +216,7 @@ a:active{
   color: #555
 }
 h3{
-  margin: .7em 0 .2em
+  margin: 0 0 .5em
 }
 form{
   font-family: inherit
@@ -252,6 +253,11 @@ input{
 .info b{
   display: inline-block;
   min-width: 2em;
+}
+.engines, .bookmarks{
+  float: left;
+  margin-right: 2em;
+  min-width: 40%;
 }
 </style>
 
