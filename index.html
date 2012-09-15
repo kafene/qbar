@@ -93,98 +93,98 @@ engines = [
     k:'l', n:'localhost',
     u:'http://localhost',
   },
-];
-debug = false;
+]
+debug = false
 
 // FUNCTIONS
 function get_param() {
-  a = {};
+  a = {}
   window.location.href.replace(/[?&]+([^=&]+)=?([^&]*)/gi, 
     function(m,k,v){
-      try{ a[k] = decodeURIComponent(v); }
-      catch(err){ a[k] = ''; } // %s bug in firefox
-    });
-  return a;
+      try{ a[k] = decodeURIComponent(v).replace(/\+/g, ' ') }
+      catch(err){ a[k] = '' } // %s bug in firefox
+    })
+  return a
 }
 function info(s, a){
-  box = document.getElementById('info');
-  if (a) box.innerHTML += s;
-  else   box.innerHTML  = s;
+  box = document.getElementById('info')
+  if (a) box.innerHTML += s
+  else   box.innerHTML  = s
 }
 function shrink(s){
-  return s.trim().replace(/ +/g, ' ');
+  return s.trim().replace(/ +/g, ' ')
 }
 function list(){
-  m = '';
-  e = '';
+  m = ''
+  e = ''
   for (i in engines){
-    s = '<b>' + engines[i].k + '</b> ' + engines[i].n + '<br>';
-    if (engines[i].s) e += s;
-    else m += s;
+    s = '<b>' + engines[i].k + '</b> ' + engines[i].n + '<br>'
+    if (engines[i].s) e += s
+    else m += s
   }
   info('<div class="engines"><h3>engines</h3>' + e + '</div>'
-     + '<div class="bookmarks"><h3>bookmarks</h3>' + m + '</div>');
+     + '<div class="bookmarks"><h3>bookmarks</h3>' + m + '</div>')
 }
 function get_engine(k, s){
   for (i in engines){
     if (engines[i].k == k){
-      if (!(!engines[i].s && s))  return engines[i];
+      if (!(!engines[i].s && s))  return engines[i]
     }
   }
 }
 function search(q, go){
-  full = q;
-  q = shrink(q);
-  a = q.split(' ')[0];
-  s = q.substr(a.length).trim();
+  full = q
+  q = shrink(q)
+  a = q.split(' ')[0]
+  s = q.substr(a.length).trim()
   // list commands
-  if (q == "ls" || !q || q == '%s') list();
+  if (q == "ls" || !q || q == '%s') list()
   // load url
   else if (q.match(/^https?:\/\/[^ ]+$/i) || full.match(/^[^ ]+\.[^ ]{2,}$/)){
-    if (!q.match(/^https?:\/\/[^ ]+$/i)) q = 'http://' + q;
-    info('Go to: <a href="' + q + '">' + q + '</a>');
-    if (!debug && go) window.location.assign(q);
+    if (!q.match(/^https?:\/\/[^ ]+$/i)) q = 'http://' + q
+    info('Go to: <a href="' + q + '">' + q + '</a>')
+    if (!debug && go) window.location.assign(q)
   }
   // search or bookmark
   else {
-    e = get_engine(a, s);
+    e = get_engine(a, s)
     // default engine
     if (!e){
-      e = engines[0];
-      s = q;
+      e = engines[0]
+      s = q
     }
     // search
     if ((e.s && s) || (!e.u && !s)){
-      url = e.s.replace(/%s/gi, encodeURIComponent(s));
+      url = e.s.replace(/%s/gi, encodeURIComponent(s))
     }
     // bookmark
-    else url = e.u;
-    info('<b>' + e.n + '</b> ' + ((!s && e.s)?'...':s) + '<br>');
-    info('<a href="' + url + '">' + url + '</a>', true);
-    if (!debug && go) window.location.assign(url);
+    else url = e.u
+    info('<b>' + e.n + '</b> ' + ((!s && e.s)?'...':s) + '<br>')
+    info('<a href="' + url + '">' + url + '</a>', true)
+    if (!debug && go) window.location.assign(url)
   }
 }
 
 // ONLOAD
 window.onload = function(){
-  q = document.getElementById('q');
-  form = document.getElementById('form');
-  q.value = '';
-  q.focus();
-  if (get_param().d != undefined) debug = true;
+  q = document.getElementById('q')
+  form = document.getElementById('form')
+  q.value = ''
+  q.focus()
+  if (get_param().d != undefined) debug = true
   form.onsubmit = function(){
-    search(q.value, true);
-    return false;
-  };
-  q.onkeyup = function(){
-    search(q.value);
-  };
-  if (get_param().q){
-    q.value = get_param().q;
-    search(q.value, true);
+    search(q.value, true)
+    return false
   }
-  else search(q.value);
-};
+  q.onkeyup = function(){
+    search(q.value)
+  }
+  if (get_param().q){
+    q.value = get_param().q
+    search(q.value, true)
+  }
+  else search(q.value)
+}
 </script>
 
 <!-- STYLE -->
