@@ -72,6 +72,9 @@ engines = [
     u:'http://translate.google.com',
     s:'http://translate.google.com/#cs|en|%s',
   }, {
+    k:'f', n:'feedly',
+    u:'http://feedly.com/home',
+  }, {
     k:'rss', n:'google reader',
     u:'https://reader.google.com',
   }, {
@@ -159,8 +162,8 @@ function search(q, go){
     }
     // bookmark
     else url = e.u
-    info('<b>' + e.n + '</b> ' + ((!s && e.s)?'...':s) + '<br>')
-    info('<a href="' + url + '">' + url + '</a>', true)
+    info('<b>' + e.n + '</b> ' + ((!s && e.s) ? '...' : s.substr(0, 40) + (s.length > 40 ? '...' : '')) + '<br>')
+      info('<a href="' + url + '">' + url.substr(0, 60) + (url.length > 60 ? '...' : '') + '</a>', true)
     if (!debug && go) window.location.assign(url)
   }
 }
@@ -204,6 +207,7 @@ body{
   border: 0;
 }
 a{
+  font-size: 80%;
   text-decoration: none
 }
 a, a:visited{
