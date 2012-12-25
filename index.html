@@ -1,9 +1,62 @@
-<!DOCTYPE HTML>
-<html lang="en">
+<?php ob_start() ?>
+<!DOCTYPE HTML><!--
+<?php
+$json = file_get_contents(__FILE__);
+$json = preg_replace(';.*engines\s*=\s*([^\]]*\]).*$;s', '\1', $json);
+$engines = json_decode($json);
+
+if (isset($_GET['q'])){
+  $q = $_GET['q'];
+  $full = $q;
+  $q = trim(preg_replace(';\s+;', ' ', $q));
+  $parts = explode(' ', $q, 2);
+  $a = $parts[0];
+  $s = isset($parts[1]) ? $parts[1] : null;
+  $s = trim($s);
+  // list commands
+  if ($q == 'ls' || empty($q) || $q == '%s')
+    $goto = false;
+  // load url
+  elseif (preg_match('/^https?:\/\/[^ ]+$/i', $q)
+      || preg_match('/^[^ ]+\.[^ ]{2,}$/', $full)){
+    if (!preg_match('/^https?:\/\/[^ ]+$/i', $q))
+      $q = 'http://' + $q;
+    $goto = $q;
+  }
+  // search or bookmark
+  else {
+    foreach ($engines as $engine){
+      if ($engine->k == $a){
+        $e = $engine;
+        break;
+      }
+    }
+    // default engine
+    if (!isset($e) || ($s && !isset($e->s))){
+      $e = $engines[0];
+      $s = $q;
+    }
+    // search
+    if (($s && isset($e->s)) || (!isset($e->u) && empty($s))){
+      $goto = preg_replace('/%s/i', urlencode($s), $e->s);
+    }
+    // bookmark
+    else{
+      $goto = $e->u;
+    }
+  }
+  // redirect
+  if ($goto){
+    header('Location: ' . $goto);
+    die();
+  }
+  echo ob_get_clean();
+}
+?>--><html lang="en">
 <head>
   <title>Q bar</title>
   <meta charset="utf-8">
-  <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABmJLR0QA/wD/AP+gvaeTAAAEx0lEQVRYw72XTWxUVRTHf+d2KKWhhU7RXtIEkKoxhpl5inz4kWgIG6MhMS7cmaDixoVBIiZGQnTDxoSFgQRdmKhRY1ywNkZjMAZR9M4UbKCJH5TKHQqlVChtkXddeKa5PGboFAgnmUzy3v3433v+5/8/T2gykiQxgAGWAkuAFBDgAjAMTDrnAnMMmWVTARYCfcA6oAQUgLuAKwroLFABysAhYAA455y7clMAkiRpB1YDzwJPAiuA1lnW+xv4FvgS+M45d+6GACRJ0gs8A7ysJ55reOBD4FPn3JHrDWyps3kfsA14FVheZ84lPelfwDgwD5ifGbNQU7bSWvun936oKQB68m3AZmBRZuww8APwhZ7uI+Ab4BgwpkC6dWwAcsqdXmvtoPd++Lop0Jy/ALwDdOkiAlwGDgD7lGSnnXMT0bxWIA+sUuBPKfja/CngY2CHc87XBaBsfwzYk8n5tJ50N3BsNmYnSWKBl4CtCqoGoqoH+8A5d/maFFhrO4BXgE3Ru8u6+S7n3HHv/aw17r2/YK0tK/A1QFvEifnAQe/9mXiO0f8+LbU4DgC7nXO/z4X+zrnzwF7g8+wFAeuTJLmKd0YVbp3WeUy4fUqwOYdzbhx4D/gletwNrM2SuyavpYzI9AOHmlWzBjEIfJ3h233A4iyApRniXQJ+BE5zc/Ev8D0Q53w50KeknwGwRLW9FqeBX+NSu8E0pMBv6g21uBPojfXHqKvFVz0GnODWxAgQq2Cqv6tSIFE1ACzQGr4V0ZFZy2T9x6ifn42e2f81JWltdpdCobCwVCo9XSgUNmSs/B7g/mjouN5wGgMYVj+vRaeWS77JzduNMa+LyB5jzPvFYvH5aO31wLJo+AlgUPkxM2hSm4msaKxqBoAxZhOwBVgmIn0i8m6hUNii1bUxM/x4piow2kYdUoutxb3AZtX260YIYaqW1xBCEJE7jDG70jTdDTweDb0AHNYUXOMFEyoSxejdMmDSWlv23k81AtDd3T1ojOkA1ohIawgBEWnX9VpEZjhXAfY554bqAZjSUnxCjSOokSTAtLW20gjEyMhI6OrqOpDL5fIi8oCI5BTEzM4iclEteb/3/lo39N4Ha20VaFdfyCmIdnW1pdbaP6y15621IXbGJEkkl8uJiBwJIWwUESsioiAQEUIIR0Vkp3PuVMOOyHs/qSBWqjua6CYeUkavANqstVf0twR4EHgOeE1E1oUQWvTURDfQFkL4uVqtHp21KU2S5BHgLWBDnV4PZfGAKlxe6zwuNdI0xZgZbQuAhBCGQwhviMhn5XI5bdiUeu+HrLWDmoZe5UQc7WoqBeDuOr0jInIxhHBSRDpDCAYIItIpIg8DQ52dnQOjo6OhLgAFMWyt/UmNab6K04LZPmS01CpKuJ3AuIisFpF5ehMdwNpcLjdarVbLDQFE7ZUDDuqVn9INgnbAk9q2nQGOaof8iTYy+8vl8smenp6DIhK0ukR1YjHwaE9Pz4l8Pj8gzaidtlGLtJno09TUvg3HtPk4A4w556bjuaVSqQPYDmxXnQhaJYfTNN0gc7U3NZn45tJY2xv4RZsxZoeIvBkp6N40TbcKtymKxeICEdkKvAh8FUJ4u1Kp+NsGQEG0Al0hhH/6+/snAP4Dr4a2xSpk5isAAAAASUVORK5CYII=">
+  <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAQAAABKfvVzAAAB1UlEQVQ4y43TQUvUURQF8N+MkIymjROz1UVlSISGERIuhnBriz5AHyEI3Aa1aOfGRRFIZJKQEGjtg5IUIkoTCTRCCKmgcUhHkKbx/1rMH51xxui+zXv3nPPefYd7E2qjWYtTMoKCdTtKh3CJqn3aFcP6dGlH0br3XnilqGH0mrErEqpWZNuUnkb0nJWY8tuG1+Z8U4plywbrb1+JwXk3DTgp67IRS3F2Ua+a2mdiYFynZNX/ukwKImUTWg8E1+zG9La6UjtMiwR5QwdGPhKJzOtsaEa3VUEwVnE0qUWfhD+e2WgoWPMEDEhXEhcVBBsGHBX9tgSbFUZSRju++Hyk4JOPSMtWBCF2JHmkIBljoXIoKOK0M3W0nOuacE4vfslXgIwPgpKRmr5iyFdl9zS7IwgWZCrAMeMiwZKuGsENQaRk1ndBMHoADdsWBJM6qgQps/b22/CH3AHUZipOT+uukmS8i/NlD7RUP99jWRCJrLqlX0qrS277GXdwZPzQDw1aVI7v2zLnjWJ82hNEgruaDrf4hHzN+FRqf+hlvB+VqpW0GjLmrU179mxaMCon5YSnsWNjmhN1M552VlaQt6awPzGPXcWOC/4zsp4ruV/r1b+j3XnH+Qv708Uh1/U+PAAAAABJRU5ErkJggg==">
 </head>
 <body>
   <form id="form" action="index.html" method="GET">
@@ -17,85 +70,112 @@
 <script type="text/javascript">
 engines = [
   {
-    k:'g', n:'google',
-    u:'https://google.com',
-    s:'https://google.com/search?q=%s',
+    "k":"g", "n":"google",
+    "u":"https://google.com",
+    "s":"https://google.com/search?q=%s"
   }, {
-    k:'y', n:'youtube',
-    u:'https://www.youtube.com',
-    s:'https://www.youtube.com/results?search_query=%s',
+    "k":"y", "n":"youtube",
+    "u":"https://www.youtube.com",
+    "s":"https://www.youtube.com/results?search_query=%s"
   }, {
-    k:'m', n:'google maps',
-    u:'https://maps.google.com',
-    s:'https://maps.google.com/maps?q=%s',
+    "k":"m", "n":"google maps",
+    "u":"https://maps.google.com",
+    "s":"https://maps.google.com/maps?q=%s"
   }, {
-    k:'i', n:'google images',
-    u:'https://google.com/imghp',
-    s:'https://google.com/search?tbm=isch&q=%s',
+    "k":"i", "n":"google images",
+    "u":"https://google.com/imghp",
+    "s":"https://google.com/search?tbm=isch&q=%s"
   }, {
-    k:'d', n:'duck duck go',
-    s:'https://duckduckgo.com/?k1=-1&kp=-1&q=%s',
+    "k":"d", "n":"duck duck go",
+    "s":"https://duckduckgo.com/?k1=-1&kp=-1&q=%s"
   }, {
-    k:'gh', n:'github',
-    u:'https://github.com/unu',
-    s:'https://github.com/search?q=%s',
+    "k":"wa", "n":"wolfram alpha",
+    "u":"http://www.wolframalpha.com",
+    "s":"http://www.wolframalpha.com/input/?i=%s"
   }, {
-    k:'a', n:'alternativeto',
-    u:'http://alternativeto.net',
-    s:'http://alternativeto.net/SearchResult.aspx?profile=all&search=%s',
+    "k":"gh", "n":"github",
+    "u":"https://github.com/unu",
+    "s":"https://github.com/search?type=Repositories&q=%s"
   }, {
-    k:'w', n:'wikipedia.cz',
-    u:'https://cs.wikipedia.org',
-    s:'https://cs.wikipedia.org/w/index.php?search=%s',
+    "k":"tw", "n":"twitter",
+    "u":"https://twitter.com",
+    "s":"https://twitter.com/search?q=%s"
   }, {
-    k:'r', n:'rlslog',
-    u:'http://www.rlslog.net',
-    s:'http://www.rlslog.net/?s=%s',
+    "k":"a", "n":"alternativeto",
+    "u":"http://alternativeto.net",
+    "s":"http://alternativeto.net/SearchResult.aspx?profile=all&search=%s"
   }, {
-    k:'u', n:'ulož.to',
-    u:'http://www.uloz.to',
-    s:'http://www.uloz.to/hledej/?q=%s',
+    "k":"w", "n":"wikipedia.cz",
+    "u":"https://cs.wikipedia.org",
+    "s":"https://cs.wikipedia.org/w/index.php?search=%s"
   }, {
-    k:'c', n:'čsfd',
-    u:'http://www.csfd.cz',
-    s:'http://www.csfd.cz/hledat/?q=%s',
+    "k":"r", "n":"rlslog",
+    "u":"http://www.rlslog.net",
+    "s":"http://www.rlslog.net/?s=%s"
   }, {
-    k:'t', n:'titulky',
-    u:'http://www.titulky.com',
-    s:'http://www.titulky.com/index.php?Fulltext=%s',
+    "k":"u", "n":"ulož.to",
+    "u":"http://www.uloz.to",
+    "s":"http://www.uloz.to/hledej/?q=%s"
   }, {
-    k:'cs', n:'en > cs',
-    u:'http://translate.google.com',
-    s:'http://translate.google.com/#en|cs|%s',
+    "k":"c", "n":"čsfd",
+    "u":"http://www.csfd.cz",
+    "s":"http://www.csfd.cz/hledat/?q=%s"
   }, {
-    k:'en', n:'cs > en',
-    u:'http://translate.google.com',
-    s:'http://translate.google.com/#cs|en|%s',
+    "k":"t", "n":"titulky",
+    "u":"http://www.titulky.com",
+    "s":"http://www.titulky.com/index.php?Fulltext=%s"
   }, {
-    k:'f', n:'feedly',
-    u:'http://feedly.com/home',
+    "k":"cs", "n":"en > cs",
+    "u":"http://translate.google.com",
+    "s":"http://translate.google.com/#en|cs|%s"
   }, {
-    k:'rss', n:'google reader',
-    u:'https://reader.google.com',
+    "k":"en", "n":"cs > en",
+    "u":"http://translate.google.com",
+    "s":"http://translate.google.com/#cs|en|%s"
   }, {
-    k:'gm', n:'gmail',
-    u:'https://mail.google.com',
+    "k":"mphp", "n":"manual php",
+    "u":"http://php.net/manual",
+    "s":"http://php.net/manual-lookup.php?pattern=%s"
   }, {
-    k:'+', n:'google+',
-    u:'https://plus.google.com',
+    "k":"mcss", "n":"manual css",
+    "u":"http://dochub.io/#css",
+    "s":"http://dochub.io/#css/%s"
   }, {
-    k:'db', n:'dropbox',
-    u:'https://dropbox.com',
+    "k":"mjs", "n":"manual js",
+    "u":"http://dochub.io/#javascript",
+    "s":"http://dochub.io/#javascript/%s"
   }, {
-    k:'gb', n:'gimme bar',
-    u:'https://gimmebar.com',
+    "k":"mhtml", "n":"manual html",
+    "u":"http://dochub.io/#html",
+    "s":"http://dochub.io/#html/%s"
   }, {
-    k:'x', n:'xkcd',
-    u:'https://xkcd.com/',
+    "k":"f", "n":"feedly",
+    "u":"http://feedly.com/home"
   }, {
-    k:'l', n:'localhost',
-    u:'http://localhost',
-  },
+    "k":"rss", "n":"google reader",
+    "u":"https://reader.google.com"
+  }, {
+    "k":"gm", "n":"gmail",
+    "u":"https://mail.google.com"
+  }, {
+    "k":"+", "n":"google+",
+    "u":"https://plus.google.com"
+  }, {
+    "k":"db", "n":"dropbox",
+    "u":"https://dropbox.com"
+  }, {
+    "k":"gb", "n":"gimme bar",
+    "u":"https://gimmebar.com"
+  }, {
+    "k":"x", "n":"xkcd",
+    "u":"https://xkcd.com/"
+  }, {
+    "k":"p", "n":"pocket",
+    "u":"https://getpocket.com"
+  }, {
+    "k":"l", "n":"localhost",
+    "u":"http://localhost"
+  }
 ]
 debug = false
 
