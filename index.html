@@ -1,356 +1,170 @@
 <?php ob_start() ?>
-<!DOCTYPE HTML><!--
-<?php
-$json = file_get_contents(__FILE__);
-$json = preg_replace(';.*engines\s*=\s*([^\]]*\]).*$;s', '\1', $json);
-$engines = json_decode($json);
-
-if (isset($_GET['q'])){
-  $q = $_GET['q'];
-  $full = $q;
-  $q = trim(preg_replace(';\s+;', ' ', $q));
-  $parts = explode(' ', $q, 2);
-  $a = $parts[0];
-  $s = isset($parts[1]) ? $parts[1] : null;
-  $s = trim($s);
-  // list commands
-  if ($q == 'ls' || empty($q) || $q == '%s')
-    $goto = false;
-  // load url
-  elseif (preg_match('/^https?:\/\/[^ ]+$/i', $q)
-      || preg_match('/^[^ ]+\.[^ ]{2,}$/', $full)){
-    if (!preg_match('/^https?:\/\/[^ ]+$/i', $q))
-      $q = 'http://' + $q;
-    $goto = $q;
-  }
-  // search or bookmark
-  else {
-    foreach ($engines as $engine){
-      if ($engine->k == $a){
-        $e = $engine;
-        break;
-      }
-    }
-    // default engine
-    if (!isset($e) || ($s && !isset($e->s))){
-      $e = $engines[0];
-      $s = $q;
-    }
-    // search
-    if (($s && isset($e->s)) || (!isset($e->u) && empty($s))){
-      $goto = preg_replace('/%s/i', urlencode($s), $e->s);
-    }
-    // bookmark
-    else{
-      $goto = $e->u;
-    }
-  }
-  // redirect
-  if ($goto){
-    header('Location: ' . $goto);
-    die();
-  }
-  echo ob_get_clean();
-}
-?>--><html lang="en">
+<!DOCTYPE HTML>
+<html lang="en">
 <head>
   <title>Q bar</title>
   <meta charset="utf-8">
   <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAQAAABKfvVzAAAB1UlEQVQ4y43TQUvUURQF8N+MkIymjROz1UVlSISGERIuhnBriz5AHyEI3Aa1aOfGRRFIZJKQEGjtg5IUIkoTCTRCCKmgcUhHkKbx/1rMH51xxui+zXv3nPPefYd7E2qjWYtTMoKCdTtKh3CJqn3aFcP6dGlH0br3XnilqGH0mrErEqpWZNuUnkb0nJWY8tuG1+Z8U4plywbrb1+JwXk3DTgp67IRS3F2Ua+a2mdiYFynZNX/ukwKImUTWg8E1+zG9La6UjtMiwR5QwdGPhKJzOtsaEa3VUEwVnE0qUWfhD+e2WgoWPMEDEhXEhcVBBsGHBX9tgSbFUZSRju++Hyk4JOPSMtWBCF2JHmkIBljoXIoKOK0M3W0nOuacE4vfslXgIwPgpKRmr5iyFdl9zS7IwgWZCrAMeMiwZKuGsENQaRk1ndBMHoADdsWBJM6qgQps/b22/CH3AHUZipOT+uukmS8i/NlD7RUP99jWRCJrLqlX0qrS277GXdwZPzQDw1aVI7v2zLnjWJ82hNEgruaDrf4hHzN+FRqf+hlvB+VqpW0GjLmrU179mxaMCon5YSnsWNjmhN1M552VlaQt6awPzGPXcWOC/4zsp4ruV/r1b+j3XnH+Qv708Uh1/U+PAAAAABJRU5ErkJggg==">
 </head>
 <body>
-  <form id="form" action="index.html" method="GET">
-    <input class="query" id="q" type="text" name="q" value="" autofocus /><!--
- --><input class="button" type="submit" value="Q" />
+  <div id="config" style="display:none">
+(g)oogle https://google.com /search?q=%s
+(o)pen https://google.com/search?btnI=1 &q=%s
+(y)outube https://www.youtube.com /results?search_query=%s
+(m)aps https://maps.google.com /maps?q=%s
+(i)mages https://google.com/search?tbm=isch &q=%s
+(d)uck https://duckduckgo.com /?k1=-1&kp=-1&q=%s
+(wa)lpha http://www.wolframalpha.com /input/?i=%s
+(gh)ub https://github.com /search?type=Repositories&q=%s
+(bb)ucket https://bitbucket.org /repo/all?name=%s
+(tw)iter https://twitter.com /search?q=%s
+(a)lternative http://alternativeto.net /SearchResult.aspx?profile=all&search=%s
+(w)ikipedia https://cs.wikipedia.org /w/index.php?search=%s
+(r)lslog http://www.rlslog.net /?s=%s
+(u)lozto http://www.uloz.to /hledej/?q=%s
+(c)sfd http://www.csfd.cz /hledat/?q=%s
+(t)itulky http://www.titulky.com /index.php?Fulltext=%s
+(cs) http://translate.google.com/#en|cs|%s
+(en) http://translate.google.com/#cs|en|%s
+(mphp) http://php.net/manual-lookup.php?pattern=%s
+(mcss) http://dochub.io/#css/%s
+(mjs) http://dochub.io/#javascript/%s
+(mhtml) http://dochub.io/#html/%s
+(f)eedly http://feedly.com/home
+(rss) https://reader.google.com
+(gm)ail https://mail.google.com
+(gp)lus https://plus.google.com
+(db)ox https://dropbox.com
+(gb)ar https://gimmebar.com
+(x)kcd https://xkcd.com/
+(p)ocket https://getpocket.com
+(l)ocalhost http://localhost
+  </div>
+  <form id="form" action="" method="GET">
+    <input id="q" type="text" name="q" value="" autofocus />
+    <input type="submit" value="Q" />
   </form>
-  <div class="info" id="info"></div>
+  <div id="list"></div>
 </body>
-
-<!-- CONFIG -->
-<script type="text/javascript">
-engines = [
-  {
-    "k":"g", "n":"google",
-    "u":"https://google.com",
-    "s":"https://google.com/search?q=%s"
-  }, {
-    "k":"o", "n":"open",
-    "u":"https://google.com",
-    "s":"https://google.com/search?btnI=1&q=%s"
-  }, {
-    "k":"y", "n":"youtube",
-    "u":"https://www.youtube.com",
-    "s":"https://www.youtube.com/results?search_query=%s"
-  }, {
-    "k":"m", "n":"google maps",
-    "u":"https://maps.google.com",
-    "s":"https://maps.google.com/maps?q=%s"
-  }, {
-    "k":"i", "n":"google images",
-    "u":"https://google.com/imghp",
-    "s":"https://google.com/search?tbm=isch&q=%s"
-  }, {
-    "k":"d", "n":"duck duck go",
-    "s":"https://duckduckgo.com/?k1=-1&kp=-1&q=%s"
-  }, {
-    "k":"wa", "n":"wolfram alpha",
-    "u":"http://www.wolframalpha.com",
-    "s":"http://www.wolframalpha.com/input/?i=%s"
-  }, {
-    "k":"gh", "n":"github",
-    "u":"https://github.com/unu",
-    "s":"https://github.com/search?type=Repositories&q=%s"
-  }, {
-    "k":"bb", "n":"bitbucket",
-    "u":"https://bitbucket.org/unu",
-    "s":"https://bitbucket.org/repo/all?name=%s"
-  }, {
-    "k":"tw", "n":"twitter",
-    "u":"https://twitter.com",
-    "s":"https://twitter.com/search?q=%s"
-  }, {
-    "k":"a", "n":"alternativeto",
-    "u":"http://alternativeto.net",
-    "s":"http://alternativeto.net/SearchResult.aspx?profile=all&search=%s"
-  }, {
-    "k":"w", "n":"wikipedia.cz",
-    "u":"https://cs.wikipedia.org",
-    "s":"https://cs.wikipedia.org/w/index.php?search=%s"
-  }, {
-    "k":"r", "n":"rlslog",
-    "u":"http://www.rlslog.net",
-    "s":"http://www.rlslog.net/?s=%s"
-  }, {
-    "k":"u", "n":"ulož.to",
-    "u":"http://www.uloz.to",
-    "s":"http://www.uloz.to/hledej/?q=%s"
-  }, {
-    "k":"c", "n":"čsfd",
-    "u":"http://www.csfd.cz",
-    "s":"http://www.csfd.cz/hledat/?q=%s"
-  }, {
-    "k":"t", "n":"titulky",
-    "u":"http://www.titulky.com",
-    "s":"http://www.titulky.com/index.php?Fulltext=%s"
-  }, {
-    "k":"cs", "n":"en > cs",
-    "u":"http://translate.google.com",
-    "s":"http://translate.google.com/#en|cs|%s"
-  }, {
-    "k":"en", "n":"cs > en",
-    "u":"http://translate.google.com",
-    "s":"http://translate.google.com/#cs|en|%s"
-  }, {
-    "k":"mphp", "n":"manual php",
-    "u":"http://php.net/manual",
-    "s":"http://php.net/manual-lookup.php?pattern=%s"
-  }, {
-    "k":"mcss", "n":"manual css",
-    "u":"http://dochub.io/#css",
-    "s":"http://dochub.io/#css/%s"
-  }, {
-    "k":"mjs", "n":"manual js",
-    "u":"http://dochub.io/#javascript",
-    "s":"http://dochub.io/#javascript/%s"
-  }, {
-    "k":"mhtml", "n":"manual html",
-    "u":"http://dochub.io/#html",
-    "s":"http://dochub.io/#html/%s"
-  }, {
-    "k":"f", "n":"feedly",
-    "u":"http://feedly.com/home"
-  }, {
-    "k":"rss", "n":"google reader",
-    "u":"https://reader.google.com"
-  }, {
-    "k":"gm", "n":"gmail",
-    "u":"https://mail.google.com"
-  }, {
-    "k":"+", "n":"google+",
-    "u":"https://plus.google.com"
-  }, {
-    "k":"db", "n":"dropbox",
-    "u":"https://dropbox.com"
-  }, {
-    "k":"gb", "n":"gimme bar",
-    "u":"https://gimmebar.com"
-  }, {
-    "k":"x", "n":"xkcd",
-    "u":"https://xkcd.com/"
-  }, {
-    "k":"p", "n":"pocket",
-    "u":"https://getpocket.com"
-  }, {
-    "k":"l", "n":"localhost",
-    "u":"http://localhost"
-  }
-]
-debug = false
-
-// FUNCTIONS
-function get_param() {
-  a = {}
-  window.location.href.replace(/[?&]+([^=&]+)=?([^&]*)/gi, 
-    function(m,k,v){
-      try{ a[k] = decodeURIComponent(v).replace(/\+/g, ' ') }
-      catch(err){ a[k] = '' } // %s bug in firefox
-    })
-  return a
-}
-function info(s, a){
-  box = document.getElementById('info')
-  if (a) box.innerHTML += s
-  else   box.innerHTML  = s
-}
-function shrink(s){
-  return s.trim().replace(/ +/g, ' ')
-}
-function list(){
-  m = ''
-  e = ''
-  for (i in engines){
-    s = '<b>' + engines[i].k + '</b> ' + engines[i].n + '<br>'
-    if (engines[i].s) e += s
-    else m += s
-  }
-  info('<div class="engines"><h3>engines</h3>' + e + '</div>'
-     + '<div class="bookmarks"><h3>bookmarks</h3>' + m + '</div>')
-}
-function get_engine(k, s){
-  for (i in engines){
-    if (engines[i].k == k){
-      if (!(!engines[i].s && s))  return engines[i]
-    }
-  }
-}
-function search(q, go){
-  full = q
-  q = shrink(q)
-  a = q.split(' ')[0]
-  s = q.substr(a.length).trim()
-  // list commands
-  if (q == "ls" || !q || q == '%s') list()
-  // load url
-  else if (q.match(/^https?:\/\/[^ ]+$/i) || full.match(/^[^ ]+\.[^ ]{2,}$/)){
-    if (!q.match(/^https?:\/\/[^ ]+$/i)) q = 'http://' + q
-    info('Go to: <a href="' + q + '">' + q + '</a>')
-    if (!debug && go) window.location.assign(q)
-  }
-  // search or bookmark
-  else {
-    e = get_engine(a, s)
-    // default engine
-    if (!e){
-      e = engines[0]
-      s = q
-    }
-    // search
-    if ((e.s && s) || (!e.u && !s)){
-      url = e.s.replace(/%s/gi, encodeURIComponent(s))
-    }
-    // bookmark
-    else url = e.u
-    info('<b>' + e.n + '</b> ' + ((!s && e.s) ? '...' : s.substr(0, 40) + (s.length > 40 ? '...' : '')) + '<br>')
-      info('<a href="' + url + '">' + url.substr(0, 60) + (url.length > 60 ? '...' : '') + '</a>', true)
-    if (!debug && go) window.location.assign(url)
-  }
-}
-
-// ONLOAD
-window.onload = function(){
-  q = document.getElementById('q')
-  form = document.getElementById('form')
-  q.value = ''
-  q.focus()
-  if (get_param().d != undefined) debug = true
-  form.onsubmit = function(){
-    search(q.value, true)
-    return false
-  }
-  q.onkeyup = function(){
-    search(q.value)
-  }
-  if (get_param().q){
-    q.value = get_param().q
-    search(q.value, true)
-  }
-  else search(q.value)
-}
-</script>
-
-<!-- STYLE -->
 <style>
-body{
-  margin: 0 auto;
-  margin-top: 4em;
-  width: 25em;
-  font-size: 18px;
-  font-family: "Droid Sans", "Tahoma", sans;
-  color: #222;
-}
-:focus{
-  outline:none
-}
-::-moz-focus-inner{
-  border: 0;
-}
-a{
-  font-size: 80%;
-  text-decoration: none
-}
-a, a:visited{
-  color: #bbb
-}
-a:hover{
-  color: #888
-}
-a:active{
-  color: #555
-}
-h3{
-  margin: 0 0 .5em
-}
-form{
-  font-family: inherit
-  height: 50px;
-}
-input{
-  padding: 10px;
-  border: 1px solid #aaa;
-  font-size: inherit;
-  margin-bottom: 1em;
-}
-.button{
-  border-radius: 0 6px 6px 0;
-  background-color: #f5f5f5;
-  cursor: pointer;
-  width: 60px;
-}
-.button:hover{
-  background-color: #fff
-}
-.button:active{
-  background-color: #eee
-}
-.query{
-  background-color: #fff;
-  width: 20em;
-  border-right: none;
-  border-radius: 6px 0 0 6px;
-  box-shadow: 0 0 4px #eee inset;
-}
-.info{
-  padding: .5em;
-}
-.info b{
-  display: inline-block;
-  min-width: 2em;
-}
-.engines, .bookmarks{
-  float: left;
-  margin-right: 2em;
-  min-width: 40%;
-}
+  body{
+    margin: 4em auto;
+    max-width: 30em;
+    font-size: 16pt;
+  }
+  a{
+    color: #222;
+    text-decoration: none;
+    padding: .3em;
+  }
+  form{
+    margin: 1em;
+  }
+  input{
+    padding: .3em;
+    font-size: 100%;
+    font-family: inherit
+    border: 1px solid #aaa;
+  }
+  input[type='text']{
+    width: 20em;
+  }
+  input[type='submit']{
+    padding: .3em 1em;
+  }
 </style>
+<script>
+  config = document.getElementById('config').innerHTML.split("\n")
+  bookmarks = {}
+  for (i in config){
+    if (config[i].replace(/\s/g, '') != ''){
+      title = config[i].split(' ')[0]
+      titleHtml = title.replace(/\((.*)\)/, '<b>$1</b>')
+      key = title.replace(/.*\((.*)\).*/, '$1')
+      url = config[i].split(' ')[1].replace(/([\?&][a-z_\-]+=)?%s/i, '')
+      urlSearch = config[i].substr(title.length).replace(/\ /g, '').replace(/&amp;/, '&')
+      bookmarks[key] = {url:url, urlSearch:urlSearch}
+      document.getElementById('list').innerHTML
+        += '<a href="' + url + '">' + titleHtml + '</a> '
+    }
+  }
+  function search(q){
+    q = q.replace(/(^\s+|\s+$)/, '').replace(/\s+/g, ' ')
+    a = q.split(' ')[0]
+    if (q.match(/https?:\/\/.*/))
+      url = q
+    else{
+      if (typeof(bookmarks[a]) != 'undefined')
+        q = q.substr(a.length + 1)
+      else
+        a = 'g'
+      if (q.match(/^\s*$/))
+        url = bookmarks[a].url
+      else
+        url = bookmarks[a].urlSearch.replace(/%s/, q)
+    }
+    location = url
+  }
+  function getParam() {
+    a = {}
+    window.location.href.replace(/[?&]+([^=&]+)=?([^&]*)/gi, 
+      function(m,k,v){
+        try{ a[k] = decodeURIComponent(v).replace(/\+/g, ' ') }
+        catch(err){ a[k] = '' } // %s bug in firefox
+      })
+    return a
+  }
+  window.onload = function(){
+    q = document.getElementById('q')
+    q.value = ''
+    q.focus()
+    form = document.getElementById('form').onsubmit = function(){
+      search(q.value)
+      return false
+    }
+    if (getParam().q){
+      q.value = getParam().q
+      search(q.value)
+    }
+  }
+</script>
+<!--
+<?php
+  if (isset($_GET['q'])){
+    if (isset($_GET['q'])){
+      $q = $_GET['q'];
+      $config = preg_replace(';.*<div id="config"[^>]*>([^<]*)</div>.*;s', '\1', file_get_contents(__FILE__));
+      $config = explode("\n", $config);
+      $bookmarks = array();
+      foreach ($config as $line){
+        if (!preg_match('/^\s*$/', $line)){
+          $parts = explode(' ', $line);
+          $title = $parts[0];
+          $key = preg_replace('/.*\((.*)\).*/', '$1', $title);
+          $url = preg_replace('/([\?&][a-z_\-]+=)?%s/i', '', $parts[1]);
+          $urlSearch = preg_replace('/\s/', '', mb_substr($line, mb_strlen($title)));
+          $bookmarks[$key] = array('url' => $url, 'urlSearch' => $urlSearch);
+        }
+      }
+      var_dump($bookmarks);
 
-</html>
+      $q = trim(preg_replace('/\s+/', ' ', $q));
+      list($a) = explode(' ', $q);
+      if (preg_match('/https?:\/\/.*/', $q))
+        $url = $q;
+      else{
+        if (isset($bookmarks[$a]))
+          $q = trim(mb_substr($q, mb_strlen($a)));
+        else
+          $a = 'g';
+        if (empty($q))
+          $url = $bookmarks[$a]['url'];
+        else
+          $url = str_replace('%s', $q, $bookmarks[$a]['urlSearch']);
+      }
+      header('Location: ' . $url);
+      die();
+    }
+    ob_flush();
+  }
+?>-->
