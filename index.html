@@ -26,10 +26,10 @@
 (t)itulky http://www.titulky.com /index.php?Fulltext=%s
 (cs) http://translate.google.com/#en|cs|%s
 (en) http://translate.google.com/#cs|en|%s
-(mphp) http://php.net/manual-lookup.php?pattern=%s
-(mcss) http://dochub.io/#css/%s
-(mjs) http://dochub.io/#javascript/%s
-(mhtml) http://dochub.io/#html/%s
+(mp)hp http://php.net/manual-lookup.php?pattern=%s
+(mc)ss http://dochub.io/#css/%s
+(mj)s http://dochub.io/#javascript/%s
+(mh)tml http://dochub.io/#html/%s
 (f)eedly http://feedly.com/home
 (rss) https://reader.google.com
 (gm)ail https://mail.google.com
@@ -146,8 +146,6 @@
           $bookmarks[$key] = array('url' => $url, 'urlSearch' => $urlSearch);
         }
       }
-      var_dump($bookmarks);
-
       $q = trim(preg_replace('/\s+/', ' ', $q));
       list($a) = explode(' ', $q);
       if (preg_match('/https?:\/\/.*/', $q))
