@@ -130,39 +130,37 @@
 </script>
 <!--
 <?php
-  if (isset($_GET['q'])){
-    if (isset($_GET['q'])){
-      $q = $_GET['q'];
-      $config = preg_replace(';.*<div id="config"[^>]*>([^<]*)</div>.*;s', '\1', file_get_contents(__FILE__));
-      $config = explode("\n", $config);
-      $bookmarks = array();
-      foreach ($config as $line){
-        if (!preg_match('/^\s*$/', $line)){
-          $parts = explode(' ', $line);
-          $title = $parts[0];
-          $key = preg_replace('/.*\((.*)\).*/', '$1', $title);
-          $url = preg_replace('/([\?&][a-z_\-]+=)?%s/i', '', $parts[1]);
-          $urlSearch = preg_replace('/\s/', '', mb_substr($line, mb_strlen($title)));
-          $bookmarks[$key] = array('url' => $url, 'urlSearch' => $urlSearch);
-        }
+  $q = isset($_GET['q']) ? $_GET['q'] : null;
+  if (!empty($q) && $q != '%s'){
+    $config = preg_replace(';.*<div id="config"[^>]*>([^<]*)</div>.*;s', '\1', file_get_contents(__FILE__));
+    $config = explode("\n", $config);
+    $bookmarks = array();
+    foreach ($config as $line){
+      if (!preg_match('/^\s*$/', $line)){
+        $parts = explode(' ', $line);
+        $title = $parts[0];
+        $key = preg_replace('/.*\((.*)\).*/', '$1', $title);
+        $url = preg_replace('/([\?&][a-z_\-]+=)?%s/i', '', $parts[1]);
+        $urlSearch = preg_replace('/\s/', '', mb_substr($line, mb_strlen($title)));
+        $bookmarks[$key] = array('url' => $url, 'urlSearch' => $urlSearch);
       }
-      $q = trim(preg_replace('/\s+/', ' ', $q));
-      list($a) = explode(' ', $q);
-      if (preg_match('/https?:\/\/.*/', $q))
-        $url = $q;
-      else{
-        if (isset($bookmarks[$a]))
-          $q = trim(mb_substr($q, mb_strlen($a)));
-        else
-          $a = 'g';
-        if (empty($q))
-          $url = $bookmarks[$a]['url'];
-        else
-          $url = str_replace('%s', $q, $bookmarks[$a]['urlSearch']);
-      }
-      header('Location: ' . $url);
-      die();
     }
-    ob_flush();
+    $q = trim(preg_replace('/\s+/', ' ', $q));
+    list($a) = explode(' ', $q);
+    if (preg_match('/https?:\/\/.*/', $q))
+      $url = $q;
+    else{
+      if (isset($bookmarks[$a]))
+        $q = trim(mb_substr($q, mb_strlen($a)));
+      else
+        $a = 'g';
+      if (empty($q))
+        $url = $bookmarks[$a]['url'];
+      else
+        $url = str_replace('%s', $q, $bookmarks[$a]['urlSearch']);
+    }
+    header('Location: ' . $url, true, 302);
+    die();
   }
+  ob_flush();
 ?>-->
