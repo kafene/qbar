@@ -1,5 +1,4 @@
-Q bar - portable omnibar
-========================
+# Q bar - portable omnibar
 
 Q bar brings many search engines to one page.
 
