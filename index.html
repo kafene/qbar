@@ -96,7 +96,11 @@
     if (q.match(/https?:\/\/.*/))
       url = q
     else{
-      if (typeof(bookmarks[a]) != 'undefined')
+      if (q.substr(-1) == '.'){
+        a = 'o'
+        q = q.replace(/.$/, '')
+      }
+      else if (typeof(bookmarks[a]) != 'undefined')
         q = q.substr(a.length + 1)
       else
         a = 'g'
@@ -152,7 +156,11 @@
     if (preg_match('/https?:\/\/.*/', $q))
       $url = $q;
     else{
-      if (isset($bookmarks[$a]))
+      if (mb_substr($q, -1) == '.'){
+        $a = 'o';
+        $q = mb_substr($q, 0, -1);
+      }
+      elseif (isset($bookmarks[$a]))
         $q = trim(mb_substr($q, mb_strlen($a)));
       else
         $a = 'g';
