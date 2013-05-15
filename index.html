@@ -8,39 +8,44 @@
 </head>
 <body>
   <div id="config" style="display:none">
-(g)oogle https://google.com /search?q=%s
-(o)pen https://google.com/search?btnI=1 &q=%s
-(y)outube https://www.youtube.com /results?search_query=%s
-(m)aps https://maps.google.com /maps?q=%s
-(i)mages https://google.com/search?tbm=isch &q=%s
-(d)uck https://duckduckgo.com /?k1=-1&kp=-1&q=%s
-(wa)lpha http://www.wolframalpha.com /input/?i=%s
-(gh)ub https://github.com /search?type=Repositories&q=%s
-(bb)ucket https://bitbucket.org /repo/all?name=%s
-(tw)iter https://twitter.com /search?q=%s
 (a)lternative http://alternativeto.net /SearchResult.aspx?profile=all&search=%s
-(w)ikipedia https://cs.wikipedia.org /w/index.php?search=%s
+(bf)an http://www.bookfan.eu /vyhledavani?q=%s
+(bb)ucket https://bitbucket.org /repo/all?name=%s
 (c)sfd http://www.csfd.cz /hledat/?q=%s
-(r)lslog http://www.rlslog.net /?s=%s
-(u)lozto http://www.uloz.to /hledej/?q=%s
-(pb)ay https://thepiratebay.se /search/%s/0/7/0
-(t)itulky http://www.titulky.com /index.php?Fulltext=%s
 (cs) http://translate.google.com/#en|cs|%s
+(d)uck https://duckduckgo.com /?k1=-1&kp=-1&q=%s
+(db)ox https://dropbox.com
+(ec)alendar http://www.episodecalendar.com /search?q=%s
 (en) http://translate.google.com/#cs|en|%s
-(mp)hp http://php.net/manual-lookup.php?pattern=%s
-(mc)ss http://dochub.io/#css/%s
-(mj)s http://dochub.io/#javascript/%s
-(mh)tml http://dochub.io/#html/%s
+(fb)ook https://www.facebook.com /search/results.php?q=%s
 (f)eedly http://feedly.com/home
-(rss) https://reader.google.com
+(fm) http://ex.fm /search/%s
+(g)oogle https://google.com /search?q=%s
+(gb)ar https://gimmebar.com
+(gh)ub https://github.com /search?type=Repositories&q=%s
 (gm)ail https://mail.google.com
 (gp)lus https://plus.google.com
-(db)ox https://dropbox.com
-(gb)ar https://gimmebar.com
-(x)kcd https://xkcd.com/
-(p)ocket https://getpocket.com
+(i)mages https://google.com/search?tbm=isch &q=%s
 (ic)on http://iconmonstr.com /?s=%s
+(im)o https://imo.im
 (l)ocalhost http://localhost
+(m)aps https://maps.google.com /maps?q=%s
+(mc)ss http://dochub.io/#css/%s
+(mh)tml http://dochub.io/#html/%s
+(mj)s http://dochub.io/#javascript/%s
+(mp)hp http://php.net/manual-lookup.php?pattern=%s
+(o)pen https://google.com/search?btnI=1 &q=%s
+(p)ocket https://getpocket.com
+(pb)ay https://thepiratebay.se /search/%s/0/7/0
+(r)lslog http://www.rlslog.net /?s=%s
+(t)itulky http://www.titulky.com /index.php?Fulltext=%s
+(tr)ello https://trello.com /search?q=%s
+(tw)iter https://twitter.com /search?q=%s
+(u)lozto http://www.uloz.to /hledej/?q=%s
+(w)ikipedia https://cs.wikipedia.org /w/index.php?search=%s
+(wa)lpha http://www.wolframalpha.com /input/?i=%s
+(x)kcd https://xkcd.com/
+(y)outube https://www.youtube.com /results?search_query=%s
   </div>
   <form id="form" action="" method="GET">
     <input id="q" type="text" name="q" value="" autofocus />
@@ -113,7 +118,7 @@
   }
   function getParam() {
     a = {}
-    window.location.href.replace(/[?&]+([^=&]+)=?([^&]*)/gi, 
+    window.location.href.replace(/[?&]+([^=&]+)=?([^&]*)/gi,
       function(m,k,v){
         try{ a[k] = decodeURIComponent(v).replace(/\+/g, ' ') }
         catch(err){ a[k] = '' } // %s bug in firefox
