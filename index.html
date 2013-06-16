@@ -1,4 +1,3 @@
-<?php ob_start() ?>
 <!DOCTYPE HTML>
 <html lang="en">
 <head>
@@ -8,48 +7,46 @@
 </head>
 <body>
   <div id="config" style="display:none">
-(a)lternative http://alternativeto.net /SearchResult.aspx?profile=all&search=%s
-(bf)an http://www.bookfan.eu /vyhledavani?q=%s
-(bb)ucket https://bitbucket.org /repo/all?name=%s
-(c)sfd http://www.csfd.cz /hledat/?q=%s
-(cs) http://translate.google.com/#en|cs|%s
-(d)uck https://duckduckgo.com /?kj=kt&ks=n&kw=n&km=m&ku=-1&ko=1&k4=-1&kr=-1&k1=-1&ke=-1&q=%s
-(db)ox https://dropbox.com
-(ec)alendar http://www.episodecalendar.com /search?q=%s
-(en) http://translate.google.com/#cs|en|%s
-(fb)ook https://www.facebook.com /search/results.php?q=%s
-(f)eedly http://feedly.com/home
-(fm) http://ex.fm /search/%s
-(g)oogle https://google.com /search?q=%s
-(gb)ar https://gimmebar.com
-(gh)ub https://github.com /search?type=Repositories&q=%s
-(gm)ail https://mail.google.com
-(gp)lus https://plus.google.com
-(i)mages https://google.com/search?tbm=isch &q=%s
-(ic)on http://iconmonstr.com /?s=%s
-(im)o https://imo.im
-(l)ocalhost http://localhost
-(m)aps https://maps.google.com /maps?q=%s
-(mc)ss http://dochub.io/#css/%s
-(mh)tml http://dochub.io/#html/%s
-(mj)s http://dochub.io/#javascript/%s
-(mp)hp http://php.net/manual-lookup.php?pattern=%s
-(o)pen https://google.com/search?btnI=1 &q=%s
-(p)ocket https://getpocket.com
-(pb)ay https://thepiratebay.se /search/%s/0/7/0
-(r)lslog http://www.rlslog.net /?s=%s
-(t)itulky http://www.titulky.com /index.php?Fulltext=%s
-(tr)ello https://trello.com /search?q=%s
-(tw)iter https://twitter.com /search?q=%s
-(u)lozto http://www.uloz.to /hledej/?q=%s
-(w)ikipedia https://cs.wikipedia.org /w/index.php?search=%s
-(wa)lpha http://www.wolframalpha.com /input/?i=%s
-(x)kcd https://xkcd.com/
-(y)outube https://www.youtube.com /results?search_query=%s
+d  https://duckduckgo.com /?kj=kt&ks=n&kw=n&km=m&ku=-1&ko=1&k4=-1&kr=-1&k1=-1&ke=-1&q=%s
+g  https://google.com /search?q=%s
+o  https://google.com/search?btnI=1 &q=%s
+bf http://www.bookfan.eu /vyhledavani?q=%s
+c  http://www.csfd.cz /hledat/?q=%s
+cs http://translate.google.com/#en|cs|%s
+db https://dropbox.com
+ec http://www.episodecalendar.com /search?q=%s
+en http://translate.google.com/#cs|en|%s
+fb https://www.facebook.com /search/results.php?q=%s
+f  http://feedly.com/home
+fm http://ex.fm /search/%s
+gb https://gimmebar.com
+gh https://github.com /search?type=Repositories&q=%s
+gm https://mail.google.com
+gp https://plus.google.com
+i  https://google.com/search?tbm=isch &q=%s
+ic http://iconmonstr.com /?s=%s
+im https://imo.im
+l  http://localhost
+m  https://maps.google.com /maps?q=%s
+mc http://dochub.io/#css/%s
+mh http://dochub.io/#html/%s
+mj http://dochub.io/#javascript/%s
+mp http://php.net/manual-lookup.php?pattern=%s
+p  https://getpocket.com
+pb https://thepiratebay.se /search/%s/0/7/0
+r  http://www.rlslog.net /?s=%s
+t  http://www.titulky.com /index.php?Fulltext=%s
+tr https://trello.com /search?q=%s
+tw https://twitter.com /search?q=%s
+u  http://www.uloz.to /hledej/?q=%s
+w  https://cs.wikipedia.org /w/index.php?search=%s
+wa http://www.wolframalpha.com /input/?i=%s
+x  https://xkcd.com/
+y  https://www.youtube.com /results?search_query=%s
   </div>
   <form id="form" action="" method="GET">
     <input id="q" type="text" name="q" value="" autofocus />
-    <input type="submit" value="Q" />
+    <input id="submit" type="submit" value="Q" />
   </form>
   <div id="list"></div>
 </body>
@@ -64,20 +61,38 @@
     text-decoration: none;
     padding: .3em;
   }
+  b{
+    display: inline-block;
+    min-width: 2em;
+  }
   form{
-    margin: 1em;
+    margin: 1em 0;
   }
   input{
     padding: .3em;
     font-size: 100%;
     font-family: inherit
-    border: 1px solid #aaa;
   }
   input[type='text']{
     width: 20em;
+    border: 1px solid #aaa;
+    border-radius: 3px;
   }
   input[type='submit']{
     padding: .3em 1em;
+    background: #eee;
+    border: 1px solid #aaa;
+    border-radius: 3px;
+  }
+  input[type='submit']:hover{
+    background: #f5f5f5;
+  }
+  input[type='submit']:active{
+    background: #ddd;
+  }
+  #list{
+    font-size: 60%;
+    margin: 0 1em;
   }
 </style>
 <script>
@@ -85,30 +100,33 @@
   bookmarks = {}
   for (i in config){
     if (config[i].replace(/\s/g, '') != ''){
-      title = config[i].split(' ')[0]
-      titleHtml = title.replace(/\((.*)\)/, '<b>$1</b>')
-      key = title.replace(/.*\((.*)\).*/, '$1')
-      url = config[i].split(' ')[1].replace(/([\?&][a-z_\-]+=)?%s/i, '')
-      urlSearch = config[i].substr(title.length).replace(/\ /g, '').replace(/&amp;/, '&')
+      key = config[i].split(/\s+/)[0]
+      url = config[i].split(/\s+/)[1].replace(/([\?&][a-z_\-]+=)?%s/i, '')
+      html = '<b>!' + key + '</b> ' + url.replace(/^https?\:\/\/(www\.)?([^\/]*).*/, '$2') + '<br>'
+      urlSearch = config[i].substr(key.length).replace(/\ /g, '').replace(/&amp;/g, '&')
       bookmarks[key] = {url:url, urlSearch:urlSearch}
-      document.getElementById('list').innerHTML
-        += '<a href="' + url + '">' + titleHtml + '</a> '
+      document.getElementById('list').innerHTML += '<a href="' + url + '">' + html + '</a> '
     }
   }
   function search(q){
     q = q.replace(/(^\s+|\s+$)/, '').replace(/\s+/g, ' ')
-    a = q.split(' ')[0]
+    a = false
     if (q.match(/https?:\/\/.*/))
       url = q
     else{
-      if (q.substr(-1) == '.'){
-        a = 'o'
-        q = q.replace(/.$/, '')
+      if (q.match(/\!/)){
+        a = q.replace(/[^\!]*\!([^\s]*).*/, '$1')
+        q = q.replace(/\![^\s]*/, '')
+        q = q.replace(/(^\s+|\s+$)/, '').replace(/\s+/g, ' ')
       }
-      else if (typeof(bookmarks[a]) != 'undefined')
-        q = q.substr(a.length + 1)
-      else
+      if (a === false)
         a = 'g'
+      else if (a == '')
+        a = 'o'
+      else if (typeof(bookmarks[a]) == 'undefined'){
+        q = '!' + a + ' ' + q
+        a = 'd'
+      }
       if (q.match(/^\s*$/))
         url = bookmarks[a].url
       else
@@ -130,52 +148,14 @@
     q.value = ''
     q.focus()
     form = document.getElementById('form').onsubmit = function(){
+      document.body.style.display = 'none';
       search(q.value)
       return false
     }
     if (getParam().q){
+      document.body.style.display = 'none';
       q.value = getParam().q
       search(q.value)
     }
   }
 </script>
-<!--
-<?php
-  $q = isset($_GET['q']) ? $_GET['q'] : null;
-  if (!empty($q) && $q != '%s'){
-    $config = preg_replace(';.*<div id="config"[^>]*>([^<]*)</div>.*;s', '\1', file_get_contents(__FILE__));
-    $config = explode("\n", $config);
-    $bookmarks = array();
-    foreach ($config as $line){
-      if (!preg_match('/^\s*$/', $line)){
-        $parts = explode(' ', $line);
-        $title = $parts[0];
-        $key = preg_replace('/.*\((.*)\).*/', '$1', $title);
-        $url = preg_replace('/([\?&][a-z_\-]+=)?%s/i', '', $parts[1]);
-        $urlSearch = preg_replace('/\s/', '', mb_substr($line, mb_strlen($title)));
-        $bookmarks[$key] = array('url' => $url, 'urlSearch' => $urlSearch);
-      }
-    }
-    $q = trim(preg_replace('/\s+/', ' ', $q));
-    list($a) = explode(' ', $q);
-    if (preg_match('/https?:\/\/.*/', $q))
-      $url = $q;
-    else{
-      if (mb_substr($q, -1) == '.'){
-        $a = 'o';
-        $q = mb_substr($q, 0, -1);
-      }
-      elseif (isset($bookmarks[$a]))
-        $q = trim(mb_substr($q, mb_strlen($a)));
-      else
-        $a = 'g';
-      if (empty($q))
-        $url = $bookmarks[$a]['url'];
-      else
-        $url = str_replace('%s', $q, $bookmarks[$a]['urlSearch']);
-    }
-    header('Location: ' . $url, true, 302);
-    die();
-  }
-  ob_flush();
-?>-->
