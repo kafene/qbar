@@ -119,6 +119,17 @@ y  https://www.youtube.com /results?search_query=%s
         q = q.replace(/\![^\s]*/, '')
         q = q.replace(/(^\s+|\s+$)/, '').replace(/\s+/g, ' ')
       }
+      else {
+        keyword = q.replace(/\s+.*/, '')
+        if (typeof(bookmarks[keyword]) != 'undefined'){
+          a = keyword
+          q = q.replace(/^[^\s]+\s*/, '')
+        }
+        else if (q.match(/\.$/)){
+          a = 'o'
+          q = q.replace(/\.$/, '')
+        }
+      }
       if (a === false)
         a = 'g'
       else if (a == '')
